@@ -1,0 +1,246 @@
+<div class="card">
+  <p-toast />
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <p-button severity="success" label="New" icon="pi pi-plus" class="mr-2" (onClick)="openNew()" />
+    </ng-template>
+  </p-toolbar>
+
+  <p-table #dt [value]="customers" dataKey="id" [tableStyle]="{ 'min-width': '100rem' }" [rows]="10" [paginator]="true"
+    [globalFilterFields]="['name', 'gender', 'birthDate', 'maritialStatus', 'street',]" [rowHover]="true"
+    [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [expandedRowKeys]="expandedRows">
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+        <h5 class="m-0">Manage Customers</h5>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="applyFilterGlobal($event, 'contains')" placeholder="Pesquisar..." />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 4rem"></th>
+        <th> </th>
+        <th pSortableColumn='Name' style="min-width:15rem">
+          Name
+          <p-sortIcon field="Name" />
+        </th>
+        <th pSortableColumn="gender">Gender <p-sortIcon field="gender" /> </th>
+        <th pSortableColumn="birthDate" style="min-width:10rem">Birth Date <p-sortIcon field="birthDate" /> </th>
+        <th pSortableColumn="maritialStatus" style="min-width:10rem">Maritial Status <p-sortIcon
+            field="maritialStatus" />
+        </th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-customer let-expanded="expanded">
+      <tr>
+        <td>
+          <p-button type="button" pRipple [pRowToggler]="customer" [text]="true" [rounded]="true" [plain]="true"
+            [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'" />
+        </td>
+        <td>
+          <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" severity="success"
+            (onClick)="editCustomer(customer)" />
+          <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+            (onClick)="deleteCustomer(customer)" />
+        </td>
+        <td> {{ customer.name }} </td>
+        <td> {{ customer.gender }} </td>
+        <td> {{ customer.birthDate | date: 'dd/MM/yyyy' }} </td>
+        <td> {{ customer.maritialStatus }} </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="rowexpansion" let-customer>
+      <tr>
+        <td colspan="7">
+          <div class="p-3">
+            <p-table #dt [value]="customer.addresses" dataKey="id">
+              <ng-template pTemplate="header">
+      <tr>
+        <th> </th>
+        <th pSortableColumn="zipcode">Zip Code<p-sortIcon field="zipcode" /></th>
+        <th pSortableColumn="street">Street <p-sortIcon field="street" /></th>
+        <th pSortableColumn="number">Number <p-sortIcon field="number" /></th>
+        <th pSortableColumn="district">District <p-sortIcon field="district" /></th>
+        <th pSortableColumn="state">State <p-sortIcon field="state" /></th>
+        <th pSortableColumn="city">City <p-sortIcon field="city" /></th>
+        <th pSortableColumn="complement">Complement <p-sortIcon field="complement" /></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-address>
+      <tr>
+        <td>
+          <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+            (onClick)="deleteAddress(address)" />
+        </td>
+        <td>{{ address.zipCode }}</td>
+        <td>{{ address.street }}</td>
+        <td>{{ address.number }}</td>
+        <td>{{ address.district }}</td>
+        <td>{{ address.state }}</td>
+        <td>{{ address.city }}</td>
+        <td>{{ address.complement }}</td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6">There are no order for this product yet.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+</td>
+</tr>
+</ng-template>
+<ng-template pTemplate="summary">
+  <div class="flex align-items-center justify-content-between">
+    In total there are {{ customers ? customers.length : 0 }} customers.
+  </div>
+</ng-template>
+</p-table>
+
+<p-dialog [(visible)]="customerDialog" [style]="{ width: '600px', height: '600px' }" header="Customer Details"
+  [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <form [formGroup]="customerForm">
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="name">Name</label>
+          <input type="text" pInputText id="name" formControlName="name" required autofocus />
+          <small class="p-error" *ngIf="submitted && customerForm.controls['name'].invalid">Name is required.</small>
+        </div>
+        <div class="field col">
+          <label for="gender">Gender</label>
+          <p-dropdown [options]="genders" formControlName="gender" placeholder="Select Gender" />
+          <small class="p-error" *ngIf="submitted && customerForm.controls['gender'].invalid">Gender is
+            required.</small>
+        </div>
+      </div>
+
+      <div class="formgrid grid">
+        <div class="field col">
+          <label for="birthDate">Birth Date</label>
+          <p-calendar formControlName="birthDate" dateFormat="dd/mm/yy" [maxDate]="maxDate"></p-calendar>
+          <small class="p-error" *ngIf="submitted && customerForm.controls['birthDate'].invalid">Birth Date is
+            required.</small>
+        </div>
+        <div class="field col">
+          <label for="maritialStatus">Maritial Status</label>
+          <p-dropdown [options]="maritialStatus" formControlName="maritialStatus"
+            placeholder="Select Maritial Status" />
+          <small class="p-error" *ngIf="submitted && customerForm.controls['maritialStatus'].invalid">Maritial Status is
+            required.</small>
+        </div>
+      </div>
+
+      <ng-container>
+        <h4>Address Information</h4>
+        <hr>
+
+        <div formGroupName="addresses">
+          <div class="formgrid grid">
+            <div class="field col">
+              <label for="zipCode">Zip Code</label>
+              <input type="text" pInputText id="zipCode" formControlName="zipCode" (change)="onCepChange($event)"
+                required autofocus />
+              <small class="p-error" *ngIf="submittedAddress && customerForm.get('addresses.zipCode')!.invalid">Zip Code
+                is
+                required.</small>
+            </div>
+            <div class="field col">
+              <label for="street">Street</label>
+              <input type="text" pInputText id="street" formControlName="street" required />
+              <small class="p-error" *ngIf="submittedAddress && customerForm.get('addresses.street')!.invalid">Street is
+                required.</small>
+            </div>
+          </div>
+
+          <div class="formgrid grid">
+            <div class="field col">
+              <label for="number">Number</label>
+              <p-inputNumber formControlName="number" id="number" [useGrouping]="false" required />
+              <small class="p-error" *ngIf="submittedAddress && customerForm.get('addresses.number')!.invalid">Number is
+                required.</small>
+            </div>
+            <div class="field col">
+              <label for="district">District</label>
+              <input type="text" pInputText id="district" formControlName="district" required />
+              <small class="p-error"
+                *ngIf="submittedAddress && customerForm.get('addresses.district')!.invalid">District is
+                required.</small>
+            </div>
+          </div>
+
+          <div class="formgrid grid">
+            <div class="field col">
+              <label for="state">State</label>
+              <input type="text" pInputText id="state" formControlName="state" required />
+              <small class="p-error" *ngIf="submittedAddress && customerForm.get('addresses.state')!.invalid">State is
+                required.</small>
+            </div>
+            <div class="field col">
+              <label for="city">City</label>
+              <input type="text" pInputText id="city" formControlName="city" required />
+              <small class="p-error" *ngIf="submittedAddress && customerForm.get('addresses.city')!.invalid">City is
+                required.</small>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="complement">Complement</label>
+            <input type="text" pInputText id="complement" formControlName="complement" />
+          </div>
+
+          <p-button label="Add Address" icon="pi pi-plus" [text]="true" (onClick)="addAddress()" />
+        </div>
+
+        <h4>Address List</h4>
+        <p-table [value]="addresses" dataKey="id">
+          <ng-template pTemplate="header">
+            <tr>
+              <th> </th>
+
+              <th>Zip Code</th>
+              <th>Street</th>
+              <th>Number</th>
+              <th>District</th>
+              <th>State</th>
+              <th>City</th>
+              <th>Complement</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-address>
+            <tr>
+              <td>
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true"
+                  (onClick)="deleteAddress(address)" />
+              </td>
+              <td>{{ address.zipCode }}</td>
+              <td>{{ address.street }}</td>
+              <td>{{ address.number }}</td>
+              <td>{{ address.district }}</td>
+              <td>{{ address.state }}</td>
+              <td>{{ address.city }}</td>
+              <td>{{ address.complement }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7">No addresses found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </ng-container>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" icon="pi pi-times" [text]="true" (onClick)="hideDialog()" />
+    <p-button label="Save" icon="pi pi-check" [text]="true" (onClick)="saveCustomer()" />
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }" />
+</div>
